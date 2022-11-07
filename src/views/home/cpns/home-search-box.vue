@@ -5,7 +5,8 @@ import {storeToRefs} from 'pinia';
 import {computed, ref} from "vue";
 import {formatMMDD} from "@/utils/format_date";
 import dayjs from "dayjs";
-// import { useHomeStore } from '@/stores/modules/home'
+import useHomeStore from "@/stores/modules/home";
+
 const router = useRouter()
 const cityClick = () => {
   router.push('/city')
@@ -33,10 +34,21 @@ const fendDate = computed(() => {
 const onConfirm = (dates) => {
   startDate.value = dates[0];
   endDate.value = dates[1];
-
   showCalendar.value = false;
 }
 
+// 热门建议
+const homeStore = useHomeStore()
+homeStore.fetchHotSuggests()
+const hotSugests = storeToRefs(homeStore).hotSuggests
+
+// 搜索按钮
+const searchBtnClick = () => {
+  router.push({
+    path: '/search'
+
+  })
+}
 </script>
 
 <template>
@@ -72,16 +84,19 @@ const onConfirm = (dates) => {
       <div class="end">人数不限</div>
     </div>
 
-<!--    关键字-->
+    <!--    关键字-->
     <div class="flex-area keyword">关键字/位置/民宿名</div>
-
-<!--    热门建议-->
+    <!--    热门建议-->
     <div class="flex-area hot-suggest">
-      热门建议
+      <template v-for="(item, index) in hotSugests ">
+        <div class="hot-item" :style="{background:item.tagText.background.color, color:item.tagText.color}">
+          {{ item.tagText.text }}
+        </div>
+      </template>
     </div>
-<!--    搜索按钮-->
+    <!--    搜索按钮-->
     <div class="flex-area search-btn">
-      <div class="btn">
+      <div class="btn" @click="searchBtnClick">
         开始搜索
       </div>
     </div>
@@ -99,15 +114,17 @@ const onConfirm = (dates) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-left: 20px ;
-  padding-right: 20px ;
+  padding-left: 20px;
+  padding-right: 20px;
   height: 44px;
+
   .start {
     flex: 1;
     display: flex;
     justify-content: flex-start;
     align-items: center;
   }
+
   .end {
     min-width: 30%;
     display: flex;
@@ -176,13 +193,32 @@ const onConfirm = (dates) => {
   }
 }
 
-.price-counter,.keyword {
+.price-counter, .keyword {
   color: #999999;
+}
+
+.hot-suggest {
+
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  height: 100%;
+
+  .hot-item {
+    padding: 0 4px;
+    height: 22px;
+    line-height: 22px;
+    font-size: 12px;
+    margin: 10px 6px 0 5px;
+    border-radius: 8px;
+  }
+
+  margin-bottom: 15px;
 }
 
 .search-btn {
   height: 38px;
-  .btn{
+
+  .btn {
     background-color: var(--primary-color);
     height: 38px;
     width: 100%;
